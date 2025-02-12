@@ -115,6 +115,40 @@ glm_model <- glm(Recession ~ ., data = train_data, family = binomial)
 # Get probability predictions
 glm1_pred <- predict(glm_model, test_data, type = "response")  # Probabilities
 
+# Assuming glm_model is already trained (the logistic regression model)
+
+# Forecasted LSTM values for each date
+forecast_df <- data.frame(
+  A014RE1Q156NBEA = c(0.151967, 0.151156, 0.158620, 0.117890),
+  A823RL1Q225SBEA = c(1.316174, 0.569362, 0.923463, 1.299218),
+  IPNMAT = c(97.161057, 97.290321, 97.539780, 98.064980),
+  IPNCONGD = c(101.024361, 101.039444, 101.073128, 101.383087),
+  CUMFNS = c(77.376694, 77.649315, 78.023788, 78.377319),
+  USGOOD = c(21806.675781, 21813.074219, 21790.476562, 21774.101562),
+  USCONS = c(8378.535156, 8465.921875, 8562.825195, 8671.344727),
+  USINFO = c(3003.806641, 3003.205078, 3004.694092, 3001.439941),
+  USMINE = c(648.455139, 651.208496, 658.396606, 665.027710),
+  USWTRADE = c(6125.760254, 6132.789062, 6126.919922, 6120.558594),
+  Date = as.Date(c('2025-03-31', '2025-06-30', '2025-09-30', '2025-12-31'))
+)
+
+# Use the trained glm model to predict the contraction (0 or 1) for each forecasted month
+# Assuming glm_model is a pre-trained logistic regression model that predicts contraction
+
+# Predicting probabilities (type = "response" gives probabilities between 0 and 1)
+predictions <- predict(glm_model, newdata = forecast_df, type = "response")
+
+# Convert the predicted probabilities to binary classes (0 or 1)
+# Using 0.5 as the cutoff for binary classification (contraction vs. no contraction)
+predicted_class <- ifelse(predictions > 0.5, 1, 0)
+
+# Add the predicted contraction classes to the dataframe
+forecast_df$Predicted_Contraction <- predicted_class
+
+# Print the dataframe with predictions
+print(forecast_df)
+
+
 # Compute ROC Curve
 pred <- prediction(glm1_pred, test_data$Recession)
 perf <- performance(pred, measure = "tpr", x.measure = "fpr")  # TPR vs. FPR
